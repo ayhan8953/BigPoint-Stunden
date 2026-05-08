@@ -205,6 +205,20 @@ const db = {
     return rec.id;
   },
 
+  async getEmployeeHoursToday(employee_id) {
+    const today = todayCH();
+    if (USE_PG) {
+      const r = await pool.query(`
+        SELECT type, to_char(timestamp AT TIME ZONE 'Europe/Zurich','YYYY-MM-DD"T"HH24:MI:SS') as timestamp
+        FROM records WHERE employee_id=$1
+        AND (timestamp AT TIME ZONE 'Europe/Zurich')::date = $2::date
+        ORDER BY timestamp ASC`, [employee_id, today]);
+      return calcHours({ records: r.rows });
+    }
+    const recs = rj(REC_FILE,[]).filter(r => r.employee_id === employee_id && r.timestamp.startsWith(today)).sort((a,b)=>a.timestamp.localeCompare(b.timestamp));
+    return calcHours({ records: recs });
+  },
+
   async getRecords(date) {
     const filterDate = date || todayCH();
     if (USE_PG) {

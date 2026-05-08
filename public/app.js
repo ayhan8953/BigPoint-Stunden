@@ -253,6 +253,13 @@ const App = (() => {
       if (data.success) {
         document.getElementById('success-message').textContent = data.message;
         document.getElementById('success-time').textContent = formatDateTime(new Date().toISOString());
+        const hoursEl = document.getElementById('success-hours');
+        if (data.hours) {
+          hoursEl.textContent = `Gearbeitet: ${data.hours.work_time}  |  Pause: ${data.hours.break_time}`;
+          hoursEl.style.display = 'block';
+        } else {
+          hoursEl.style.display = 'none';
+        }
         showScreen('success');
         setTimeout(() => logout(), 5000);
       } else {

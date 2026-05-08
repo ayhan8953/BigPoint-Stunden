@@ -98,7 +98,13 @@ app.post('/api/record', async (req, res) => {
       break_end:   'Willkommen zurück!',
       check_out:   'Tschüss! Schicht beendet.'
     };
-    res.json({ success: true, message: msgs[type] });
+
+    let hours = null;
+    if (type === 'check_out') {
+      hours = await db.getEmployeeHoursToday(parseInt(employee_id));
+    }
+
+    res.json({ success: true, message: msgs[type], hours });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

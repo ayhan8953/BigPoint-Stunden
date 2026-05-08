@@ -213,7 +213,8 @@ h3 { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: u
   70%  { transform: scale(1.12); }
   100% { transform: scale(1); opacity: 1; }
 }
-.success-time { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; }
+.success-time { color: var(--muted); margin-bottom: 0.5rem; font-size: 0.95rem; }
+.success-hours { background: var(--surface); border-radius: 10px; padding: 0.75rem 1.25rem; font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 2rem; }
 
 /* ── ADMIN ───────────────────────────────────────────────────── */
 .admin-topbar {
