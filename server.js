@@ -66,11 +66,12 @@ app.put('/api/employees/:id/pin', async (req, res) => {
 // ── Admin PIN ─────────────────────────────────────────────────────────────
 app.put('/api/admin/pin', async (req, res) => {
   try {
-    const { pin } = req.body;
+    const { adminId, pin } = req.body;
+    if (!adminId) return res.status(400).json({ error: 'adminId fehlt' });
     if (!/^\d{4}$/.test(pin)) return res.status(400).json({ error: 'PIN muss 4 Ziffern sein' });
     if (await db.isPinTaken(pin))
-      return res.status(400).json({ error: 'Diese PIN ist bereits von einem Mitarbeiter vergeben' });
-    await db.updateAdminPin(pin);
+      return res.status(400).json({ error: 'Diese PIN ist bereits vergeben' });
+    await db.updateAdminPin(parseInt(adminId), pin);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

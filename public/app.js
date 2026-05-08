@@ -2,9 +2,10 @@ const App = (() => {
   let pinValue = '';
   let currentEmployee = null;
   let currentAction = null;
-  let capturedPhoto = null;   // base64 data URL
+  let capturedPhoto = null;
   let cameraStream = null;
   let pinChangeTargetId = null;
+  let currentAdminId = null;
 
   const statusMap = {
     absent:      { label: 'Nicht anwesend', css: 'status-absent',   icon: '⭕' },
@@ -124,6 +125,7 @@ const App = (() => {
       updateDots();
 
       if (data.type === 'admin') {
+        currentAdminId = data.adminId;
         showScreen('admin');
         initAdmin();
       } else if (data.type === 'employee') {
@@ -393,7 +395,7 @@ const App = (() => {
       const res = await fetch('/api/admin/pin', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin })
+        body: JSON.stringify({ adminId: currentAdminId, pin })
       });
       const data = await res.json();
       if (data.error) { alert(data.error); return; }

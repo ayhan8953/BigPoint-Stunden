@@ -67,6 +67,7 @@ const db = {
       `);
       await pool.query(`
         INSERT INTO admin_config (id, name, pin) VALUES (1, 'Eyup', '0000') ON CONFLICT (id) DO NOTHING;
+        INSERT INTO admin_config (id, name, pin) VALUES (2, 'Ayhan', '1627') ON CONFLICT (id) DO NOTHING;
         INSERT INTO employees (name, pin) VALUES ('Shafiq','1111'),('Sadat','2222'),('Mohammed','3333') ON CONFLICT (name) DO NOTHING;
       `);
     } else {
@@ -76,15 +77,23 @@ const db = {
         { id: 2, name: 'Sadat',    pin: '2222', created_at: nowCH() },
         { id: 3, name: 'Mohammed', pin: '3333', created_at: nowCH() }
       ]);
-      if (!fs.existsSync(ADMIN_FILE)) wj(ADMIN_FILE, { name: 'Eyup', pin: '0000' });
+      if (!fs.existsSync(ADMIN_FILE)) wj(ADMIN_FILE, [
+        { id: 1, name: 'Eyup',  pin: '0000' },
+        { id: 2, name: 'Ayhan', pin: '1627' }
+      ]);
+      else {
+        const raw = rj(ADMIN_FILE, null);
+        if (raw && !Array.isArray(raw)) wj(ADMIN_FILE, [{ id: 1, ...raw }, { id: 2, name: 'Ayhan', pin: '1627' }]);
+      }
       if (!fs.existsSync(REC_FILE))   wj(REC_FILE, []);
     }
   },
 
   async login(pin) {
     if (USE_PG) {
-      const a = await pool.query('SELECT * FROM admin_config WHERE id=1');
-      if (a.rows[0]?.pin === pin) return { type: 'admin', name: a.rows[0].name };
+      const a = await pool.query('SELECT * FROM admin_config');
+      const admin = a.rows.find(r => r.pin === pin);
+      if (admin) return { type: 'admin', name: admin.name, adminId: admin.id };
       const e = await pool.query('SELECT id, name FROM employees WHERE pin=$1', [pin]);
       if (!e.rows[0]) return null;
       const today = todayCH();
@@ -94,8 +103,9 @@ const db = {
         ORDER BY timestamp DESC LIMIT 1`, [e.rows[0].id, today]);
       return { type: 'employee', employee: { ...e.rows[0], status: r.rows[0]?.type || 'absent' } };
     } else {
-      const admin = rj(ADMIN_FILE, {});
-      if (pin === admin.pin) return { type: 'admin', name: admin.name };
+      const admins = Array.isArray(rj(ADMIN_FILE, [])) ? rj(ADMIN_FILE, []) : [{ id: 1, ...rj(ADMIN_FILE, {}) }];
+      const admin = admins.find(a => a.pin === pin);
+      if (admin) return { type: 'admin', name: admin.name, adminId: admin.id };
       const emps = rj(EMP_FILE, []);
       const emp = emps.find(e => e.pin === pin);
       if (!emp) return null;
@@ -140,20 +150,22 @@ const db = {
 
   async isPinTaken(pin, excludeId = null) {
     if (USE_PG) {
-      const a = await pool.query('SELECT pin FROM admin_config WHERE id=1');
-      if (a.rows[0]?.pin === pin) return true;
+      const a = await pool.query('SELECT pin FROM admin_config');
+      if (a.rows.some(r => r.pin === pin)) return true;
       const q = excludeId ? 'SELECT id FROM employees WHERE pin=$1 AND id!=$2' : 'SELECT id FROM employees WHERE pin=$1';
       const r = await pool.query(q, excludeId ? [pin,excludeId] : [pin]);
       return r.rows.length > 0;
     }
-    const admin = rj(ADMIN_FILE, {});
-    if (pin === admin.pin) return true;
+    const admins = Array.isArray(rj(ADMIN_FILE, [])) ? rj(ADMIN_FILE, []) : [rj(ADMIN_FILE, {})];
+    if (admins.some(a => a.pin === pin)) return true;
     return rj(EMP_FILE,[]).some(e => e.pin===pin && e.id!==excludeId);
   },
 
-  async updateAdminPin(pin) {
-    if (USE_PG) { await pool.query('UPDATE admin_config SET pin=$1 WHERE id=1', [pin]); return; }
-    const a = rj(ADMIN_FILE, {}); a.pin = pin; wj(ADMIN_FILE, a);
+  async updateAdminPin(adminId, pin) {
+    if (USE_PG) { await pool.query('UPDATE admin_config SET pin=$1 WHERE id=$2', [pin, adminId]); return; }
+    const admins = Array.isArray(rj(ADMIN_FILE, [])) ? rj(ADMIN_FILE, []) : [{ id: 1, ...rj(ADMIN_FILE, {}) }];
+    const i = admins.findIndex(a => a.id === adminId);
+    if (i >= 0) { admins[i].pin = pin; wj(ADMIN_FILE, admins); }
   },
 
   async getStatus() {
