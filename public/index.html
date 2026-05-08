@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BigPoint Stunden</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <span class="logo">⏱ BigPoint Stunden</span>
+      <span id="header-time" class="header-time"></span>
+    </div>
+  </header>
+
+  <!-- PIN EINGABE -->
+  <section id="screen-pin" class="screen active">
+    <div class="pin-wrapper">
+      <h2>PIN eingeben</h2>
+      <div id="pin-dots" class="pin-dots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      <div id="pin-error" class="pin-error" style="visibility:hidden">Falsche PIN — bitte erneut versuchen</div>
+      <div class="numpad">
+        <button class="num-btn" onclick="App.pinPress('1')">1</button>
+        <button class="num-btn" onclick="App.pinPress('2')">2</button>
+        <button class="num-btn" onclick="App.pinPress('3')">3</button>
+        <button class="num-btn" onclick="App.pinPress('4')">4</button>
+        <button class="num-btn" onclick="App.pinPress('5')">5</button>
+        <button class="num-btn" onclick="App.pinPress('6')">6</button>
+        <button class="num-btn" onclick="App.pinPress('7')">7</button>
+        <button class="num-btn" onclick="App.pinPress('8')">8</button>
+        <button class="num-btn" onclick="App.pinPress('9')">9</button>
+        <button class="num-btn num-empty"></button>
+        <button class="num-btn" onclick="App.pinPress('0')">0</button>
+        <button class="num-btn num-del" onclick="App.pinDelete()">⌫</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MITARBEITER AKTION -->
+  <section id="screen-action" class="screen">
+    <button class="back-btn" onclick="App.logout()">← Abmelden</button>
+    <div class="employee-card">
+      <div id="action-avatar" class="avatar big"></div>
+      <h2 id="action-name"></h2>
+      <div id="action-status-badge" class="status-badge"></div>
+    </div>
+    <div id="action-buttons" class="action-buttons"></div>
+  </section>
+
+  <!-- KAMERA -->
+  <section id="screen-camera" class="screen">
+    <button class="back-btn" onclick="App.cancelCamera()">← Abbrechen</button>
+    <h2 id="camera-title"></h2>
+    <div class="camera-container">
+      <video id="camera-video" autoplay playsinline></video>
+    </div>
+    <button class="capture-btn" onclick="App.capturePhoto()">📷 Foto aufnehmen</button>
+  </section>
+
+  <!-- VORSCHAU -->
+  <section id="screen-preview" class="screen">
+    <h2>Foto überprüfen</h2>
+    <div class="preview-container">
+      <img id="preview-image" src="" alt="Vorschau">
+    </div>
+    <div class="preview-buttons">
+      <button class="btn btn-secondary" onclick="App.retakePhoto()">🔄 Wiederholen</button>
+      <button class="btn btn-primary" id="confirm-btn" onclick="App.confirmPhoto()">✓ Bestätigen</button>
+    </div>
+  </section>
+
+  <!-- ERFOLG -->
+  <section id="screen-success" class="screen">
+    <div class="success-icon">✓</div>
+    <h2 id="success-message"></h2>
+    <p id="success-time" class="success-time"></p>
+    <button class="btn btn-secondary" onclick="App.logout()">Fertig</button>
+  </section>
+
+  <!-- ADMIN PANEL -->
+  <section id="screen-admin" class="screen">
+    <div class="admin-topbar">
+      <span class="admin-title">👑 Admin — Eyup</span>
+      <button class="logout-btn" onclick="App.logout()">Abmelden</button>
+    </div>
+
+    <!-- Live Status -->
+    <div class="admin-card">
+      <h3>Live-Übersicht</h3>
+      <div id="admin-live" class="live-grid"></div>
+    </div>
+
+    <!-- Aufzeichnungen -->
+    <div class="admin-card">
+      <h3>Aufzeichnungen</h3>
+      <input type="date" id="admin-date" class="date-input" onchange="App.loadRecords()">
+      <div id="admin-records" class="admin-records" style="margin-top:1rem"></div>
+    </div>
+
+    <!-- Mitarbeiter verwalten -->
+    <div class="admin-card">
+      <h3>Mitarbeiter</h3>
+      <div id="employee-list" class="employee-list"></div>
+      <div class="add-employee-form" id="add-form" style="display:none">
+        <input type="text" id="new-emp-name" placeholder="Name" class="form-input">
+        <input type="text" id="new-emp-pin" placeholder="PIN (4 Ziffern)" maxlength="4" pattern="[0-9]*" inputmode="numeric" class="form-input">
+        <div class="form-row">
+          <button class="btn btn-secondary btn-sm" onclick="App.hideAddForm()">Abbrechen</button>
+          <button class="btn btn-primary btn-sm" onclick="App.addEmployee()">Speichern</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="show-add-btn" onclick="App.showAddForm()" style="margin-top:0.8rem">+ Mitarbeiter hinzufügen</button>
+    </div>
+
+    <!-- Admin PIN -->
+    <div class="admin-card">
+      <h3>Mein PIN ändern</h3>
+      <div class="form-row">
+        <input type="text" id="admin-new-pin" placeholder="Neuer PIN (4 Ziffern)" maxlength="4" pattern="[0-9]*" inputmode="numeric" class="form-input">
+        <button class="btn btn-primary btn-sm" onclick="App.changeAdminPin()">Ändern</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOTO MODAL -->
+  <div id="photo-modal" class="modal" onclick="App.closeModal()">
+    <img id="modal-image" src="" alt="">
+  </div>
+
+  <!-- PIN ÄNDERN MODAL -->
+  <div id="pin-modal" class="modal" onclick="">
+    <div class="pin-modal-box" onclick="event.stopPropagation()">
+      <h3 id="pin-modal-title">PIN ändern</h3>
+      <input type="text" id="pin-modal-input" placeholder="Neuer PIN (4 Ziffern)" maxlength="4" pattern="[0-9]*" inputmode="numeric" class="form-input">
+      <div class="form-row" style="margin-top:0.8rem">
+        <button class="btn btn-secondary btn-sm" onclick="App.closePinModal()">Abbrechen</button>
+        <button class="btn btn-primary btn-sm" onclick="App.saveNewPin()">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
