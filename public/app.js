@@ -297,7 +297,7 @@ const App = (() => {
   async function loadEmployeeList() {
     const list = document.getElementById('employee-list');
     try {
-      const res = await fetch('/api/employees-with-pins');
+      const res = await fetch('/api/employees');
       const employees = await res.json();
       if (employees.length === 0) { list.innerHTML = '<div class="empty">Keine Mitarbeiter</div>'; return; }
       list.innerHTML = employees.map(e => `
