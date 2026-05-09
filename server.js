@@ -114,6 +114,11 @@ app.get('/api/records', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.delete('/api/records/:id', async (req, res) => {
+  try { await db.deleteRecord(parseInt(req.params.id)); res.json({ success: true }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────
 async function start() {
   await db.init();

@@ -433,12 +433,13 @@ const App = (() => {
           </div>
           <div class="summary-body">
             ${s.records.map(r => `
-              <div class="record-row">
+              <div class="record-row" id="rec-${r.id}">
                 <div class="record-type type-${r.type}">${typeLabel(r.type)}</div>
                 <div class="record-time">${formatTime(r.timestamp)}</div>
                 ${r.photo_data
                   ? `<img class="record-photo" src="${r.photo_data}" alt="Foto" onclick="App.openModal('${r.photo_data}')">`
                   : `<div class="no-photo">kein Foto</div>`}
+                <button class="del-rec-btn" onclick="App.deleteRecord(${r.id})" title="Eintrag löschen">🗑️</button>
               </div>`).join('')}
           </div>
         </div>`).join('');
@@ -453,6 +454,14 @@ const App = (() => {
       check_out:   '🏠 Feierabend'
     };
     return labels[type] || type;
+  }
+
+  async function deleteRecord(id) {
+    if (!confirm('Diesen Eintrag wirklich löschen?')) return;
+    try {
+      await fetch(`/api/records/${id}`, { method: 'DELETE' });
+      loadRecords();
+    } catch { alert('Fehler beim Löschen.'); }
   }
 
   function openModal(src) {
@@ -486,6 +495,6 @@ const App = (() => {
     startAction, capturePhoto, retakePhoto, cancelCamera, confirmPhoto,
     showAddForm, hideAddForm, addEmployee, deleteEmployee,
     openPinModal, closePinModal, saveNewPin, changeAdminPin,
-    loadRecords, openModal, closeModal
+    loadRecords, openModal, closeModal, deleteRecord
   };
 })();

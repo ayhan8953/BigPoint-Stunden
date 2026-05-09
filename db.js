@@ -219,6 +219,11 @@ const db = {
     return calcHours({ records: recs });
   },
 
+  async deleteRecord(id) {
+    if (USE_PG) { await pool.query('DELETE FROM records WHERE id=$1', [id]); return; }
+    wj(REC_FILE, rj(REC_FILE,[]).filter(r => r.id !== id));
+  },
+
   async getRecords(date) {
     const filterDate = date || todayCH();
     if (USE_PG) {
