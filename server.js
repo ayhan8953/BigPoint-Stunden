@@ -119,6 +119,13 @@ app.delete('/api/records/:id', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get('/api/monthly', async (req, res) => {
+  try {
+    const month = req.query.month || new Date().toLocaleDateString('sv-SE').slice(0, 7);
+    res.json(await db.getMonthlyHours(month));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────
 async function start() {
   await db.init();

@@ -27,17 +27,24 @@ if (USE_PG) {
 }
 
 // ── Stunden berechnen ──────────────────────────────────────────────────────
-function calcHours(s) {
+function calcMs(records) {
   let workMs = 0, breakMs = 0, lastIn = null, lastBreak = null;
-  for (const r of s.records) {
+  for (const r of records) {
     const t = new Date(r.timestamp).getTime();
     if      (r.type === 'check_in')    { lastIn = t; }
     else if (r.type === 'break_start') { if (lastIn) workMs += t - lastIn; lastBreak = t; lastIn = null; }
     else if (r.type === 'break_end')   { if (lastBreak) breakMs += t - lastBreak; lastIn = t; lastBreak = null; }
     else if (r.type === 'check_out')   { if (lastIn) workMs += t - lastIn; lastIn = null; }
   }
-  const wh = Math.floor(workMs / 3600000), wm = Math.floor((workMs % 3600000) / 60000);
-  return { ...s, work_time: `${wh}h ${wm}min`, break_time: `${Math.floor(breakMs / 60000)}min` };
+  return { workMs, breakMs };
+}
+function fmtMs(ms) {
+  const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+  return `${h}h ${m}min`;
+}
+function calcHours(s) {
+  const { workMs, breakMs } = calcMs(s.records);
+  return { ...s, work_time: fmtMs(workMs), break_time: `${Math.floor(breakMs / 60000)}min` };
 }
 
 // ── Datenbank-Abstraktionsschicht ──────────────────────────────────────────
@@ -217,6 +224,31 @@ const db = {
     }
     const recs = rj(REC_FILE,[]).filter(r => r.employee_id === employee_id && r.timestamp.startsWith(today)).sort((a,b)=>a.timestamp.localeCompare(b.timestamp));
     return calcHours({ records: recs });
+  },
+
+  async getMonthlyHours(yearMonth) {
+    if (USE_PG) {
+      const emps = await pool.query('SELECT id, name FROM employees ORDER BY name');
+      const r = await pool.query(`
+        SELECT employee_id, type,
+               to_char(timestamp AT TIME ZONE 'Europe/Zurich','YYYY-MM-DD"T"HH24:MI:SS') as timestamp
+        FROM records
+        WHERE to_char(timestamp AT TIME ZONE 'Europe/Zurich','YYYY-MM') = $1
+        ORDER BY employee_id, timestamp ASC
+      `, [yearMonth]);
+      return emps.rows.map(emp => {
+        const records = r.rows.filter(rec => rec.employee_id === emp.id);
+        const { workMs, breakMs } = calcMs(records);
+        return { id: emp.id, name: emp.name, work_time: fmtMs(workMs), break_time: fmtMs(breakMs), has_data: records.length > 0 };
+      });
+    }
+    const emps = rj(EMP_FILE, []).sort((a,b) => a.name.localeCompare(b.name));
+    const allRecs = rj(REC_FILE, []).filter(r => r.timestamp.startsWith(yearMonth)).sort((a,b) => a.timestamp.localeCompare(b.timestamp));
+    return emps.map(emp => {
+      const records = allRecs.filter(r => r.employee_id === emp.id);
+      const { workMs, breakMs } = calcMs(records);
+      return { id: emp.id, name: emp.name, work_time: fmtMs(workMs), break_time: fmtMs(breakMs), has_data: records.length > 0 };
+    });
   },
 
   async deleteRecord(id) {

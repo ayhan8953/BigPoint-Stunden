@@ -88,44 +88,70 @@
   <!-- ADMIN PANEL -->
   <section id="screen-admin" class="screen">
     <div class="admin-topbar">
-      <span class="admin-title">👑 Admin — Eyup</span>
+      <span id="admin-title" class="admin-title">&#128081; Admin</span>
       <button class="logout-btn" onclick="App.logout()">Abmelden</button>
     </div>
 
-    <!-- Live Status -->
+    <!-- Live Status (immer sichtbar) -->
     <div class="admin-card">
-      <h3>Live-Übersicht</h3>
+      <h3>Live-&#220;bersicht</h3>
       <div id="admin-live" class="live-grid"></div>
     </div>
 
-    <!-- Aufzeichnungen -->
-    <div class="admin-card">
-      <h3>Aufzeichnungen</h3>
-      <input type="date" id="admin-date" class="date-input" onchange="App.loadRecords()">
-      <div id="admin-records" class="admin-records" style="margin-top:1rem"></div>
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="App.adminTab('records')">&#128203; Aufzeichnungen</button>
+      <button class="admin-tab" onclick="App.adminTab('monthly')">&#128197; Monat</button>
+      <button class="admin-tab" onclick="App.adminTab('employees')">&#128101; Mitarbeiter</button>
+      <button class="admin-tab" onclick="App.adminTab('pin')">&#128273; PIN</button>
     </div>
 
-    <!-- Mitarbeiter verwalten -->
-    <div class="admin-card">
-      <h3>Mitarbeiter</h3>
-      <div id="employee-list" class="employee-list"></div>
-      <div class="add-employee-form" id="add-form" style="display:none">
-        <input type="text" id="new-emp-name" placeholder="Name" class="form-input">
-        <input type="text" id="new-emp-pin" placeholder="PIN (4 Ziffern)" maxlength="4" pattern="[0-9]*" inputmode="numeric" class="form-input">
-        <div class="form-row">
-          <button class="btn btn-secondary btn-sm" onclick="App.hideAddForm()">Abbrechen</button>
-          <button class="btn btn-primary btn-sm" onclick="App.addEmployee()">Speichern</button>
-        </div>
+    <!-- Tab: Aufzeichnungen -->
+    <div id="admin-tab-records" class="admin-tab-content active">
+      <div class="admin-card">
+        <h3>Aufzeichnungen</h3>
+        <input type="date" id="admin-date" class="date-input" onchange="App.loadRecords()">
+        <div id="admin-records" class="admin-records" style="margin-top:1rem"></div>
       </div>
-      <button class="btn btn-primary" id="show-add-btn" onclick="App.showAddForm()" style="margin-top:0.8rem">+ Mitarbeiter hinzufügen</button>
     </div>
 
-    <!-- Admin PIN -->
-    <div class="admin-card">
-      <h3>Mein PIN ändern</h3>
-      <div class="form-row">
-        <input type="text" id="admin-new-pin" placeholder="Neuer PIN (4 Ziffern)" maxlength="4" pattern="[0-9]*" inputmode="numeric" class="form-input">
-        <button class="btn btn-primary btn-sm" onclick="App.changeAdminPin()">Ändern</button>
+    <!-- Tab: Monatsübersicht -->
+    <div id="admin-tab-monthly" class="admin-tab-content">
+      <div class="admin-card">
+        <div class="month-nav">
+          <button class="week-btn" onclick="App.prevMonth()">&#8249;</button>
+          <span id="month-label" class="month-label"></span>
+          <button class="week-btn" onclick="App.nextMonth()">&#8250;</button>
+        </div>
+        <div id="monthly-hours" style="margin-top:1rem"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Mitarbeiter -->
+    <div id="admin-tab-employees" class="admin-tab-content">
+      <div class="admin-card">
+        <h3>Mitarbeiter</h3>
+        <div id="employee-list" class="employee-list"></div>
+        <div class="add-employee-form" id="add-form" style="display:none">
+          <input type="text" id="new-emp-name" placeholder="Name" class="form-input">
+          <input type="text" id="new-emp-pin" placeholder="PIN (4 Ziffern)" maxlength="4" pattern="[0-9]*" inputmode="numeric" class="form-input">
+          <div class="form-row">
+            <button class="btn btn-secondary btn-sm" onclick="App.hideAddForm()">Abbrechen</button>
+            <button class="btn btn-primary btn-sm" onclick="App.addEmployee()">Speichern</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="show-add-btn" onclick="App.showAddForm()" style="margin-top:0.8rem">+ Mitarbeiter hinzuf&#252;gen</button>
+      </div>
+    </div>
+
+    <!-- Tab: PIN -->
+    <div id="admin-tab-pin" class="admin-tab-content">
+      <div class="admin-card">
+        <h3>Mein PIN &#228;ndern</h3>
+        <div class="form-row">
+          <input type="text" id="admin-new-pin" placeholder="Neuer PIN (4 Ziffern)" maxlength="4" pattern="[0-9]*" inputmode="numeric" class="form-input">
+          <button class="btn btn-primary btn-sm" onclick="App.changeAdminPin()">&#196;ndern</button>
+        </div>
       </div>
     </div>
   </section>

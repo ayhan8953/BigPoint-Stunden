@@ -126,6 +126,7 @@ const App = (() => {
 
       if (data.type === 'admin') {
         currentAdminId = data.adminId;
+        currentEmployee = { name: data.name };
         showScreen('admin');
         initAdmin();
       } else if (data.type === 'employee') {
@@ -275,11 +276,59 @@ const App = (() => {
   }
 
   // ── Admin ─────────────────────────────────────────────────────────────────
+  let currentMonth = new Date().toLocaleDateString('sv-SE').slice(0, 7);
+
   function initAdmin() {
+    document.getElementById('admin-title').textContent = `\u{1F451} ${currentEmployee?.name || 'Admin'}`;
     document.getElementById('admin-date').value = new Date().toLocaleDateString('sv-SE');
     loadLiveStatus();
-    loadRecords();
-    loadEmployeeList();
+    adminTab('records');
+  }
+
+  function adminTab(tab) {
+    document.querySelectorAll('.admin-tab').forEach((t, i) => {
+      t.classList.toggle('active', ['records','monthly','employees','pin'][i] === tab);
+    });
+    document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`admin-tab-${tab}`).classList.add('active');
+    if (tab === 'records')   loadRecords();
+    if (tab === 'monthly')   loadMonthly();
+    if (tab === 'employees') loadEmployeeList();
+  }
+
+  function prevMonth() {
+    const [y, m] = currentMonth.split('-').map(Number);
+    const d = new Date(y, m - 2, 1);
+    currentMonth = d.toLocaleDateString('sv-SE').slice(0, 7);
+    loadMonthly();
+  }
+  function nextMonth() {
+    const [y, m] = currentMonth.split('-').map(Number);
+    const d = new Date(y, m, 1);
+    currentMonth = d.toLocaleDateString('sv-SE').slice(0, 7);
+    loadMonthly();
+  }
+
+  async function loadMonthly() {
+    const el = document.getElementById('monthly-hours');
+    el.innerHTML = '<div class="loading">Lade...</div>';
+    const [y, m] = currentMonth.split('-').map(Number);
+    document.getElementById('month-label').textContent =
+      new Date(y, m - 1, 1).toLocaleDateString('de-CH', { month: 'long', year: 'numeric' });
+    try {
+      const data = await (await fetch(`/api/monthly?month=${currentMonth}`)).json();
+      if (!data.length) { el.innerHTML = '<div class="empty">Keine Mitarbeiter.</div>'; return; }
+      el.innerHTML = `<table class="monthly-table">
+        <thead><tr><th>Mitarbeiter</th><th>Arbeitszeit</th><th>Pausenzeit</th></tr></thead>
+        <tbody>
+          ${data.map(e => `<tr class="${!e.has_data ? 'no-data' : ''}">
+            <td class="emp-col">${esc(e.name)}</td>
+            <td class="hours-col">${e.has_data ? `<strong>${esc(e.work_time)}</strong>` : '<span style="color:#ccc">—</span>'}</td>
+            <td class="break-col">${e.has_data ? esc(e.break_time) : '<span style="color:#ccc">—</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    } catch { el.innerHTML = '<div class="empty">Fehler beim Laden.</div>'; }
   }
 
   async function loadLiveStatus() {
@@ -495,6 +544,7 @@ const App = (() => {
     startAction, capturePhoto, retakePhoto, cancelCamera, confirmPhoto,
     showAddForm, hideAddForm, addEmployee, deleteEmployee,
     openPinModal, closePinModal, saveNewPin, changeAdminPin,
-    loadRecords, openModal, closeModal, deleteRecord
+    loadRecords, openModal, closeModal, deleteRecord,
+    adminTab, prevMonth, nextMonth
   };
 })();
