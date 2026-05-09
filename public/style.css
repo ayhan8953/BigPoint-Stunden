@@ -59,7 +59,7 @@ h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 1.2rem; color: var(--se
 h3 { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.9rem; }
 
 /* ── PIN SCREEN ─────────────────────────────────────────────── */
-.login-logo { width: min(300px, 78vw); height: min(300px, 78vw); object-fit: contain; filter: drop-shadow(0 8px 20px rgba(196,18,23,0.28)); display: block; margin: 0 auto; }
+.login-logo { width: min(380px, 88vw); height: min(380px, 88vw); object-fit: contain; filter: drop-shadow(0 8px 24px rgba(196,18,23,0.3)); display: block; margin: 0 auto; }
 .pin-wrapper {
   display: flex;
   flex-direction: column;
