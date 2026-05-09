@@ -1,17 +1,18 @@
 :root {
-  --primary: #2563EB;
-  --primary-dark: #1D4ED8;
+  --primary: #C41217;
+  --primary-dark: #A30E12;
+  --accent: #F5C000;
   --secondary: #1E293B;
   --success: #16A34A;
   --danger: #DC2626;
   --warning: #D97706;
   --info: #0891B2;
-  --bg: #F1F5F9;
+  --bg: #FDF5F5;
   --card: #FFFFFF;
   --text: #1E293B;
   --muted: #64748B;
   --radius: 16px;
-  --shadow: 0 2px 16px rgba(0,0,0,0.09);
+  --shadow: 0 2px 16px rgba(196,18,23,0.10);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -58,13 +59,15 @@ h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 1.2rem; color: var(--se
 h3 { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.9rem; }
 
 /* ── PIN SCREEN ─────────────────────────────────────────────── */
+.login-logo { width: 130px; height: 130px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(196,18,23,0.2)); }
 .pin-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 2rem;
+  padding-top: 1rem;
+  gap: 0.5rem;
 }
-.pin-wrapper h2 { margin-bottom: 1.5rem; }
+.pin-wrapper h2 { margin-bottom: 1rem; }
 
 .pin-dots {
   display: flex;
